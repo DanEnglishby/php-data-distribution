@@ -11,6 +11,13 @@ class DataDistribution
     private $singleBinValue = 0;
     private $distributionResultsArray = [];
 
+    /**
+     * DataDistribution constructor.
+     * @param $d
+     * @param $lcl
+     * @param $ucl
+     * @param $b
+     */
     function __construct($d, $lcl, $ucl, $b)
     {
         $this->data = $d;
@@ -21,6 +28,11 @@ class DataDistribution
         $this->DefineDistributionCounters();
     }
 
+    /**
+     * DefineDistributionCounters()
+     *
+     * @return void
+     */
     public function DefineDistributionCounters()
     {
         $distributionId = "A";
@@ -31,6 +43,11 @@ class DataDistribution
         }
     }
 
+    /**
+     * Distribute()
+     *
+     * @return void
+     */
     public function Distribute()
     {
         foreach ($this->data as $value) {
