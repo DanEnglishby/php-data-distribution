@@ -13,19 +13,30 @@ class DataDistribution
 
     /**
      * DataDistribution constructor.
-     * @param $d
-     * @param $lcl
-     * @param $ucl
-     * @param $b
+     * @param $arrayData []
+     * @param $intLowerToleranceLimit int
+     * @param $intUpperToleranceLimit int
+     * @param $boolUseCustomTolerances bool
+     * @param $intBins int
      */
-    function __construct($d, $lcl, $ucl, $b)
+    function __construct($arrayData, $intLowerToleranceLimit, $intUpperToleranceLimit, $boolUseCustomTolerances, $intBins)
     {
-        $this->data = $d;
-        $this->lowerToleranceLimit = $lcl;
-        $this->upperToleranceLimit = $ucl;
-        $this->bins = $b;
+        $this->data = $arrayData;
+
+        // If custom tolerances are set.
+        if ($boolUseCustomTolerances) {
+            $this->lowerToleranceLimit = $intLowerToleranceLimit;
+            $this->upperToleranceLimit = $intUpperToleranceLimit;
+        }
+        else { // Else use min max of array as tolerances
+            $this->lowerToleranceLimit = min($this->data);
+            $this->upperToleranceLimit = max($this->data);
+        }
+
+        $this->bins = $intBins;
         $this->singleBinValue = ($this->upperToleranceLimit - $this->lowerToleranceLimit) / $this->bins; // Divide by bin to give us bin size. Eg. a 10th of the value of (ucl - lcl)
         $this->DefineDistributionCounters();
+        $this->Distribute();
     }
 
     /**
@@ -33,7 +44,7 @@ class DataDistribution
      *
      * @return void
      */
-    public function DefineDistributionCounters()
+    private function DefineDistributionCounters()
     {
         $distributionId = "A";
         // Define all distribution counter variables... Example - $distributionA, $distributionB
@@ -77,50 +88,75 @@ class DataDistribution
         for ($i = 0; $i < $this->bins; $i++) {
             $lowerBin = ($this->lowerToleranceLimit + ($this->singleBinValue * $lowerBinMultiplier));
             $upperBin = ($this->lowerToleranceLimit + ($this->singleBinValue * $upperBinMultiplier));
-            array_push($this->distributionResultsArray, ["Bin" => $lowerBin . "-" . $upperBin, "count" => $this->{"distribution" . $distributionId}]);
-            echo "Bin " . $lowerBin . "-" . $upperBin . ":  ( " . $this->{"distribution" . $distributionId} . " )";
-            echo "<br />";
-
+            array_push($this->distributionResultsArray, ["Distribution Section" => $lowerBin . "-" . $upperBin, "Count" => $this->{"distribution" . $distributionId}]);
             $distributionId++;
             $lowerBinMultiplier++;
             $upperBinMultiplier++;
         }
-
-        var_dump($this->distributionResultsArray);
     }
 
     /**
+     * DumpDistributionArray()
+     *
      * Dump Distribution results array (For debugging.)
+     * return var_dump(Array) for debugging.
      */
     public function DumpDistributionArray()
     {
-        // var_dump();
+         var_dump($this->distributionResultsArray);
     }
 
     /**
+     * GetDistributionArray()
+     *
      * Output Distribution results in an array
+     *
+     * @return array
      */
     public function GetDistributionArray()
     {
-
+        return $this->distributionResultsArray;
     }
 
     /**
+     * GetDistributionJSON()
+     *
      * Output Distribution results in JSON.
+     *
+     * @return false|string
      */
     public function GetDistributionJSON()
     {
-
+        return json_encode($this->distributionResultsArray);
     }
 
     /**
+     * GetDistributionHTMLTable()
+     *
      * Output Distribution results in a string HTML Table.
+     * @param $class string
+     * @return string
      */
-    public function GetDistributionHTMLTable()
+    public function GetDistributionHTMLTable($class)
     {
+        $html = "<table class='$class'>";
 
+        $html.= "<thead>
+                    <th>Distribution Section</th>
+                    <th>Count</th>
+                </thead>";
+        $html.= "<tbody>";
+
+        foreach ($this->distributionResultsArray as $d) {
+            $html.= "<tr><td>".$d["Distribution Section"]."</td><td>".$d["Count"]."</td></tr>";
+        }
+        $html.= "</tbody>";
+        $html.= "</table>";
+
+        return $html;
     }
 }
 
-$obj = new DataDistribution([1, 2, 3, 4, 5, 5, 5, 5, 5, 10, 10, 10, 10, 10], 0, 15, 15);
-$obj->Distribute();
+//$obj = new DataDistribution([1, 2, 3, 4, 5, 5, 5, 5, 5, 10, 10, 10, 10, 10], 0, 15, true, 15);
+//echo $obj->GetDistributionJSON();
+//echo $obj->GetDistributionHTMLTable('table');
