@@ -1,8 +1,6 @@
 <?php
 
-
-namespace DataDistribution;
-
+namespace DanEnglishby\Tools\DataDistribution;
 
 class DataDistribution
 {
